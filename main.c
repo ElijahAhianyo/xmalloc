@@ -17,7 +17,7 @@ int main(void) {
     *p = 42;
     printf("malloc -> %p value=%d\n", (void*)p, *p);
 
-    /* calloc: allocate array of 5 ints */
+    // calloc: allocate array of 5 ints
     int *arr = (int *)calloc(5, sizeof(int));
     if (!arr) {
         fprintf(stderr, "calloc failed\n");
@@ -28,15 +28,15 @@ int main(void) {
     for (int i = 0; i < 5; ++i) printf(" %d", arr[i]);
     printf("\n");
 
-    /* realloc: grow array to 10 ints */
+    // realloc: grow array to 10 ints
     int *arr2 = (int *)realloc(arr, 10 * sizeof(int));
     if (!arr2) {
         fprintf(stderr, "realloc failed\n");
         free(p);
-        free(arr); /* arr still valid if realloc failed */
+        free(arr);
         return 1;
     }
-    arr2[5] = 99; /* write in newly allocated area */
+    arr2[5] = 99;
     printf("realloc -> %p arr2[5]=%d\n", (void*)arr2, arr2[5]);
 
     free(p);
