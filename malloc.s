@@ -33,6 +33,7 @@ malloc:
 
 
 1:
+    mov x0, x6
     bl find_block
     cbz x0, .L_not_found
     mov x19, x0 
@@ -59,6 +60,7 @@ malloc:
     mov x0, x6
     bl extend_heap
     cbz x0, ret_error // heap extend failed
+    mov x19, x0
     b .L_no_split
 
 .L_no_base:

@@ -14,14 +14,22 @@ find_block:
     mov x3, xzr
     adrp x3, base;
     add x3, x3, :lo12:base
+    ldr x3, [x3]
 loop:
     cbz x3, end_loop
-    ldr x4, [x3, BLOCK_FREE_FIELD] // get the free block
-    cbz x4, end_loop
-    mov x0, x3
-    ldr x3, [x3, BLOCK_NEXT_FIELD] // get the next block
-    b loop
+    ldr x4, [x3, BLOCK_FREE_FIELD] // x4 = b->free
+    cbz x4, contine_next
+    ldr x5, [x3, BLOCK_SIZE_FIELD]
+    cmp x5, x1
+    bgt contine_next
+    // we have found a match!
+    b end_loop
 
+
+contine_next:
+    mov x0, x3
+    ldr x3, [x3, #BLOCK_NEXT_FIELD]
+    b loop
 
 end_loop:
     mov x0, x3
