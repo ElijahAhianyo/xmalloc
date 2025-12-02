@@ -29,25 +29,26 @@ calloc:
     cmp x0, NULL
     beq .L_calloc_ret_error
     
-    lsr x2, x1, 2 // get number of iterations per pointer size
+    //malloc returns the data pointer, so get the block start
+    sub x2, x0, BLOCK_SIZE
+    ldr x2, [x2] // get size
+
+
+    lsr x2, x2, #3 // get number of iterations per pointer size(size/ 8)
     mov x3, #0
 
-    mov x4, x0
-    ldr x5, [x4, #BLOCK_SIZE]
-    add x4, x4, x5
+    // mov x4, x0
+    // ldr x5, [x4, #BLOCK_SIZE]
+    // add x4, x4, x5
 
     // zero the data portion
 1:  
     cmp x3, x2
-    bge 2f
-    str xzr, [x4, x3]
+    bge .L_calloc_done
+    str xzr, [x0, x3, lsl #3]
     add x3, x3, #1
     b 1b
 
-
-2:
-    mov x4, x0
-    b .L_calloc_done
 
 .L_calloc_ret_error:
     mov x0, NULL
