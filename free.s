@@ -5,8 +5,6 @@
     .type free, %function
     .global free
 free:
-    .Lfunc_free_begin:
-    .cfi_startproc
     // x0   pointer
     stp x29, x30, [sp, #-16]!
     mov x29, sp
@@ -15,34 +13,41 @@ free:
 
     // get full block
     sub x0, x0, #BLOCK_SIZE
-    mov x1, #1
-    str x1, [x0, BLOCK_FREE_FIELD]
-1:
     mov x19, x0
-    ldr x0, [x19, BLOCK_PREV_FIELD] // block->prev
-    cbz x0, 2f // only coalesce prev if free and valid
-    ldr x1, [x0, BLOCK_FREE_FIELD] // block->prev->free
+
+    mov x1, #1
+    str x1, [x19, BLOCK_FREE_FIELD] // mark the block as free
+
+1:
+    // coalesce the prev block if possible
+    ldr x20, [x19, BLOCK_PREV_FIELD] // block->prev
+    cbz x20, 2f // only coalesce prev if free and valid
+    ldr x1, [x20, BLOCK_FREE_FIELD] // block->prev->free
     cbz x1, 2f
 
+    mov x0, x20
     bl coallesce 
-2:
-    ldr x0, [x19, BLOCK_NEXT_FIELD]  // block->next
-    cbz x0, 3f           // only coalesce next if free and valid pointer
-    ldr x1, [x0, BLOCK_FREE_FIELD]        // block->next->free
-    cbz x1, 3f
-    bl coallesce 
+    mov x19, x0
 
+2:
+    ldr x20, [x19, BLOCK_NEXT_FIELD]  // block->next
+    cbz x20, 3f           // only coalesce next if free and valid pointer
+    ldr x1, [x20, BLOCK_FREE_FIELD]        // block->next->free
+    cbz x1, 3f
+    mov x0, x19
+    bl coallesce 
+    mov x19, x0
 3:
-    // If we are the last block, then release memory to shrink the heap.
-    ldr x0, [x19, BLOCK_NEXT_FIELD] // 
-    cbnz x0, .L_free_done
-    ldr x0, [x19, BLOCK_PREV_FIELD]
-    cbnz x0, 5f
+    // If we are the last block, release memory to shrink the heap.
+    ldr x20, [x19, BLOCK_NEXT_FIELD] // get the next block
+    cbnz x20, .L_free_done           // if there's a next, we're done
+    ldr x20, [x19, BLOCK_PREV_FIELD] // get prev block
+    cbz x20, 5f                     
 
 4:
+    // set block->prev->next to NULL
     ldr x0, [x19, BLOCK_PREV_FIELD]
-    ldr x0, [x0, BLOCK_NEXT_FIELD]
-    str xzr, [x0]
+    str xzr, [x0, #BLOCK_NEXT_FIELD]
     b 6f
 
 5:
@@ -61,7 +66,5 @@ free:
     mov x0, xzr
     ldp x19, x20, [sp], #16
     ldp x29, x30, [sp], #16
-
     ret 
-    .cfi_endproc
 
