@@ -6,7 +6,6 @@
     .type malloc, %function
     .global malloc
 malloc:
-    .cfi_startproc
     /* Args
     x0    size_t size
     */

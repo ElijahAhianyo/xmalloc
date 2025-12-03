@@ -159,10 +159,7 @@ split_block:
 
 .L_split_block_done:
     mov x0, xzr
-
     ret
-    .cfi_endproc
-    .Lfunc_split_block_end:
 
     //To validate an address or a pointer, it must meet the ff conditions:
     // 1. It should be within the acceptable heap range. i.e higher than the base and 
@@ -179,9 +176,6 @@ valid_addr:
     */
 
     stp x29, x30, [sp, #-16]!
-    .cfi_def_cfa_offset 16
-    .cfi_offset 29, -16
-    .cfi_offset 30, -16
     mov x29, sp
 
     stp x19, x20, [sp, #-16]!
