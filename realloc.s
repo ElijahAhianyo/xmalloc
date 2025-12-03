@@ -12,33 +12,31 @@
 realloc:
     // x0   void *p
     // x1   size
-    stp x29, x30, [sp, #16]!
+    stp x29, x30, [sp, #-16]!
     mov x29, sp
 
-    stp x19, x20, [sp, #16]!
-    stp x21, x22, [sp, #16]!
+    stp x19, x20, [sp, #-16]!
+    stp x21, x22, [sp, #-16]!
 
-
+    mov x20, x1 // save size
     mov x21, x0 // save pointer for later
 
-    mov x2, x0
+    // mov x2, x21
     bl valid_addr  // check if the pointer is valid
     cbz x0, err
 
     // align the size
-    ALIGN8 x1
-
-    mov x20, x1 // callee save size
+    ALIGN8 x20
 
     // get the block
-    mov x0, x2
-    sub x0, x0, BLOCK_SIZE
+    mov x19, x21
+    sub x19, x19, BLOCK_SIZE
 
-    mov x19, x0
-
+    mov x0, x19
 
     // coalesce next block for more space
     bl coallesce
+    mov x19, x0
 
     // check if we have enough space where we are, split and return
     // the same address
@@ -48,6 +46,7 @@ realloc:
     cmp x0, x1
     blt 2f
 1:
+    // there's more than enough space, split it
     mov x0, x19
     mov x1, x20
     bl split_block
@@ -69,6 +68,7 @@ realloc:
     mov x0, x21
     bl free
     mov x0, x22
+    b end
 
  err:
     mov x0, xzr   

@@ -6,18 +6,14 @@
     .type malloc, %function
     .global malloc
 malloc:
-    .cfi_startproc
     /* Args
     x0    size_t size
     */
     stp x29, x30, [sp, #-16]!
-    .cfi_def_cfa_offset 16
-    .cfi_offset 29, -8
-    .cfi_offset 30, -16
     mov x29, sp
 
     stp x19, x20, [sp, #-16]!
-    .cfi_def_cfa_offset 16
+
 
     mov x1, x0
     ALIGN8 x1// align size (this should make the size 8bytes alinged)
@@ -35,6 +31,7 @@ malloc:
 1:
     mov x0, x6
     bl find_block
+    mov x6, x1 // find_block returns the updated last block in x1
     cbz x0, .L_not_found
     mov x19, x0 
 
@@ -93,8 +90,4 @@ ret_error:
 .L_malloc_done:
     ldp x19, x20, [sp], #16
     ldp x29, x30, [sp], #16
-    .cfi_restore 29
-    .cfi_restore 30
-    .cfi_def_cfa_offset 0
     ret
-    .cfi_endproc

@@ -1,4 +1,4 @@
-    // .include "data.s"
+
     .include "constants.s"
     .section .text
     .p2align 4
@@ -6,14 +6,13 @@
     .global sbrk
     
 sbrk:
-    .Lfunc_sbrk_begin:
-    .cfi_startproc
+    /*  Args:
+        x0-> size to incr
+    */
+
     stp x29, x30, [sp, #-16]!
-    .cfi_def_cfa_offset 16
-    .cfi_offset 29, -16
-    .cfi_offset 30, -8
     mov x29, sp
-    //x0-> size to incr
+    
 
     mov x1, x0
 
@@ -54,12 +53,7 @@ error:
     mov x0, #-1
 
 done:
-    
     ldp x29, x30, [sp], #16
-    .cfi_restore 29
-    .cfi_restore 30
-    .cfi_def_cfa_offset 0
     ret
     .size sbrk, (. - sbrk)
-    .cfi_endproc
     .Lfunc_sbrk_end:
